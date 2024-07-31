@@ -71,6 +71,11 @@ Você pode personalizar o estilo do aplicativo editando o arquivo `index.html` e
    ```
 5. Abra um Pull Request.
 
+6. para criar o executavel do projeto execute
+   ```bash
+   npm run dist
+   ```
+
 ## Licença
 
 Este projeto é autoral publico e qualquer pessoa pode contribuir com ele
