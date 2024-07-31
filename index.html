@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Mods</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #chooseFolder, #changeProfile {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #333;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+        #folderPath {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        #modList {
+            width: 100%;
+            list-style-type: none;
+            padding: 0;
+        }
+        #modList li {
+            background-color: #2a2a2a;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .checkbox {
+            margin-right: 15px;
+        }
+        #profileDropdown {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .profile-option {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .profile-option:hover {
+            background-color: #555;
+        }
+        .show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciador de Mods</h1>
+        <button id="chooseFolder">Escolher Pasta de Mods</button>
+        <button id="changeProfile">Alterar Perfil</button>
+        <div id="profileDropdown" class="dropdown-content"></div>
+        <div id="folderPath"></div>
+        <ul id="modList"></ul>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "mod-loader",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^13.1.7",
+    "electron-builder": "^22.14.13"
+  },
+  "build": {
+    "appId": "com.example.modmanager",
+    "productName": "ModManager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "renderer.js",
+      "mods/"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
