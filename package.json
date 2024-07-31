@@ -1,6 +1,6 @@
 {
-  "name": "noname",
-  "version": "1.3",
+  "name": "MCM",
+  "version": "1.3.1",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -12,8 +12,8 @@
     "electron-builder": "^22.14.13"
   },
   "build": {
-    "appId": "com.example.modmanager",
-    "productName": "ModManager",
+    "appId": "com.example.MCM",
+    "productName": "MCM",
     "directories": {
       "output": "dist"
     },

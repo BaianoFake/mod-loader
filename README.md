@@ -56,6 +56,7 @@ Você pode personalizar o estilo do aplicativo editando o arquivo `index.html` e
 ## Contribuindo
 
 1. Faça um fork do repositório.
+   
 2. Crie uma nova branch:
    ```bash
    git checkout -b minha-nova-funcionalidade
@@ -72,12 +73,10 @@ Você pode personalizar o estilo do aplicativo editando o arquivo `index.html` e
 
 ## Licença
 
-Este projeto é licenciado sob a [Licença MIT](LICENSE).
+Este projeto é autoral publico e qualquer pessoa pode contribuir com ele
 
 ## Contato
 
-Se você tiver dúvidas ou sugestões, sinta-se à vontade para abrir uma [issue](https://github.com/seu-usuario/gerenciador-de-mods/issues) ou me contatar diretamente.
+Se você tiver dúvidas ou sugestões, sinta-se à vontade para abrir uma [issue](https://discord.gg/5rXK3uVq) ou me contatar diretamente.
 
 ---
-
-Esse README deve cobrir todos os aspectos principais do seu projeto e fornecer informações úteis para usuários e desenvolvedores. Se precisar de mais alguma coisa ou tiver ajustes, estou aqui para ajudar!
