@@ -1,9 +1,13 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { autoUpdater } = require("electron-updater");
 
 let mainWindow;
 const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+
+autoUpdater.autoDownload = false; // Para controle manual do download
+autoUpdater.autoInstallOnAppQuit = true;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -25,6 +29,27 @@ app.whenReady().then(() => {
             const settings = JSON.parse(fs.readFileSync(settingsPath));
             mainWindow.webContents.send('load-settings', settings);
         }
+    });
+
+    // Verifica se há atualizações
+    autoUpdater.checkForUpdates();
+
+    // Notifica o usuário sobre atualizações
+    autoUpdater.on('update-available', (info) => {
+        mainWindow.webContents.send('update-available', info);
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+        mainWindow.webContents.send('update-downloaded', info);
+    });
+
+    // Adiciona listeners para o ipcMain para permitir controle de UI
+    ipcMain.on('start-download', () => {
+        autoUpdater.downloadUpdate();
+    });
+
+    ipcMain.on('quit-and-install', () => {
+        autoUpdater.quitAndInstall();
     });
 });
 

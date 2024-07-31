@@ -7,6 +7,7 @@ let disabledModFolder;
 let settings = { lastModFolder: '', history: [], profiles: {}, paths: { minecraft: '', zzz: '', genshin: '' } };
 let currentGame = 'minecraft';
 
+// Event listeners for buttons
 document.getElementById('chooseFolder').addEventListener('click', async () => {
     modFolder = await ipcRenderer.invoke('select-mod-folder');
     if (modFolder) {
@@ -45,10 +46,28 @@ document.getElementById('installMod').addEventListener('click', async () => {
     }
 });
 
+// Handle settings loading
 ipcRenderer.on('load-settings', (event, loadedSettings) => {
     settings = loadedSettings;
     loadGamePaths();
     populateHistoryDropdown();
+});
+
+// Handle updates
+ipcRenderer.on('update-available', (event, info) => {
+    // Notificar o usuário sobre a atualização disponível
+    const userDecision = confirm(`Atualização disponível (${info.version}). Deseja baixar agora?`);
+    if (userDecision) {
+        ipcRenderer.send('start-download');
+    }
+});
+
+ipcRenderer.on('update-downloaded', (event, info) => {
+    // Notificar o usuário sobre a atualização baixada
+    const userDecision = confirm(`Atualização para a versão ${info.version} foi baixada. Deseja instalar agora?`);
+    if (userDecision) {
+        ipcRenderer.send('quit-and-install');
+    }
 });
 
 function setModFolder(folder) {
@@ -78,10 +97,10 @@ function loadMods() {
         });
     };
 
-    // Carregar mods ativos
+    // Load active mods
     loadModFiles(modFolder, true);
 
-    // Carregar mods desativados
+    // Load inactive mods
     if (fs.existsSync(disabledModFolder)) {
         loadModFiles(disabledModFolder, false);
     }
