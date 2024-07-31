@@ -9,19 +9,41 @@
             background-color: #1a1a1a;
             color: #ffffff;
             font-family: Arial, sans-serif;
+            display: flex;
         }
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
+        .sidebar {
+            width: 200px;
+            background-color: #2a2a2a;
+            height: 100vh;
+            padding-top: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        #chooseFolder, #changeProfile {
+        .sidebar button {
+            background-color: #333;
+            border: none;
+            color: white;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            width: 90%;
+        }
+        .sidebar button:hover {
+            background-color: #555;
+        }
+        .container {
+            width: calc(100% - 200px);
+            padding: 20px;
+        }
+        .container h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .hidden {
+            display: none;
+        }
+        #chooseFolder, #changeProfile, #nameProfile, #installMod {
             margin: 10px;
             padding: 10px 20px;
             background-color: #333;
@@ -29,16 +51,12 @@
             color: #fff;
             cursor: pointer;
         }
-        #folderPath {
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-        #modList {
+        .mod-list {
             width: 100%;
             list-style-type: none;
             padding: 0;
         }
-        #modList li {
+        .mod-list li {
             background-color: #2a2a2a;
             margin: 5px 0;
             padding: 10px;
@@ -69,13 +87,30 @@
     </style>
 </head>
 <body>
+    <div class="sidebar">
+        <button onclick="showSection('minecraft')">Minecraft</button>
+        <button onclick="showSection('zzz')">ZZZ</button>
+        <button onclick="showSection('genshin')">Genshin Impact</button>
+    </div>
     <div class="container">
-        <h1>Gerenciador de Mods</h1>
+        <h1 id="pageTitle">Gerenciador de Mods</h1>
         <button id="chooseFolder">Escolher Pasta de Mods</button>
         <button id="changeProfile">Alterar Perfil</button>
+        <button id="nameProfile">Nomear Perfil</button>
+        <button id="installMod">Instalar Mod</button>
         <div id="profileDropdown" class="dropdown-content"></div>
-        <div id="folderPath"></div>
-        <ul id="modList"></ul>
+        <div id="minecraft" class="game-section">
+            <h2>Minecraft Mods</h2>
+            <ul id="minecraftModList" class="mod-list"></ul>
+        </div>
+        <div id="zzz" class="game-section hidden">
+            <h2>ZZZ Mods</h2>
+            <ul id="zzzModList" class="mod-list"></ul>
+        </div>
+        <div id="genshin" class="game-section hidden">
+            <h2>Genshin Impact Mods</h2>
+            <ul id="genshinModList" class="mod-list"></ul>
+        </div>
     </div>
     <script src="renderer.js"></script>
 </body>

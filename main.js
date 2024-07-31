@@ -47,6 +47,14 @@ ipcMain.handle('select-mod-folder', async () => {
     return result.filePaths[0];
 });
 
+ipcMain.handle('select-mod-file', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openFile'],
+        filters: [{ name: 'Mods', extensions: ['jar', 'zip'] }]
+    });
+    return result.filePaths[0];
+});
+
 ipcMain.handle('save-settings', (event, settings) => {
     fs.writeFileSync(settingsPath, JSON.stringify(settings));
 });
