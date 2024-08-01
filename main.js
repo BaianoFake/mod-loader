@@ -1,40 +1,63 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { autoUpdater } = require("electron-updater");
+const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
 const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+let settings = { profiles: {}, currentProfile: 'default' };
 
-autoUpdater.autoDownload = false; // Para controle manual do download
-autoUpdater.autoInstallOnAppQuit = true;
+function saveSettings() {
+    fs.writeFileSync(settingsPath, JSON.stringify(settings));
+}
+
+function loadSettings() {
+    if (fs.existsSync(settingsPath)) {
+        settings = JSON.parse(fs.readFileSync(settingsPath));
+    }
+}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
         },
     });
 
     mainWindow.loadFile('index.html');
+
+    mainWindow.maximize();
+
+    mainWindow.on('ready-to-show', () => {
+        mainWindow.show();
+        mainWindow.webContents.send('receive-profiles', Object.keys(settings.profiles));
+    });
 }
 
 app.whenReady().then(() => {
+    loadSettings();
     createWindow();
-    mainWindow.webContents.on('did-finish-load', () => {
-        if (fs.existsSync(settingsPath)) {
-            const settings = JSON.parse(fs.readFileSync(settingsPath));
-            mainWindow.webContents.send('load-settings', settings);
-        }
+
+    ipcMain.on('open-game-window', (event, game) => {
+        mainWindow.loadFile(path.join('views', `${game}.html`));
     });
 
-    // Verifica se há atualizações
+    ipcMain.on('add-profile', (event, profileName) => {
+        settings.profiles[profileName] = {};
+        saveSettings();
+        mainWindow.webContents.send('receive-profiles', Object.keys(settings.profiles));
+    });
+
+    ipcMain.on('load-profile', (event, profileName) => {
+        settings.currentProfile = profileName;
+        saveSettings();
+    });
+
     autoUpdater.checkForUpdates();
 
-    // Notifica o usuário sobre atualizações
     autoUpdater.on('update-available', (info) => {
         mainWindow.webContents.send('update-available', info);
     });
@@ -46,11 +69,6 @@ app.whenReady().then(() => {
     // Adiciona listeners para o ipcMain para permitir controle de UI
     ipcMain.on('start-download', () => {
         autoUpdater.downloadUpdate();
-    });
-
-    ipcMain.on('quit-and-install', () => {
-        autoUpdater.quitAndInstall();
-    });
 });
 
 app.on('window-all-closed', () => {
@@ -75,16 +93,14 @@ ipcMain.handle('select-mod-folder', async () => {
 ipcMain.handle('select-mod-file', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile'],
-        filters: [{ name: 'Mods', extensions: ['jar', 'zip'] }]
+        filters: [
+            { name: 'Mods', extensions: ['jar', 'zip'] }
+        ]
     });
     return result.filePaths[0];
 });
 
-ipcMain.handle('save-settings', (event, settings) => {
-    fs.writeFileSync(settingsPath, JSON.stringify(settings));
-});
-
-ipcMain.handle('move-mod', (event, modPath, destPath) => {
+ipcMain.handle('move-mod', async (event, modPath, destPath) => {
     try {
         fs.renameSync(modPath, destPath);
         return true;
@@ -92,4 +108,22 @@ ipcMain.handle('move-mod', (event, modPath, destPath) => {
         console.error(error);
         return false;
     }
+});
+
+ipcMain.handle('save-settings', (event, newSettings) => {
+    settings = newSettings;
+    saveSettings();
+    return settings;
+});
+
+ipcMain.on('load-settings', (event) => {
+    event.reply('load-settings', settings);
+});
+
+ipcMain.on('start-download', () => {
+    autoUpdater.downloadUpdate();
+});
+
+ipcMain.on('quit-and-install', () => {
+    autoUpdater.quitAndInstall();
 });

@@ -1,220 +1,143 @@
-const { ipcRenderer } = require('electron');
-const fs = require('fs');
-const path = require('path');
-
 let modFolder;
 let disabledModFolder;
 let settings = { lastModFolder: '', history: [], profiles: {}, paths: { minecraft: '', zzz: '', genshin: '' } };
-let currentGame = 'minecraft';
+let currentGame = ''; // Defina o jogo atual como 'minecraft'
 
-// Event listeners for buttons
-document.getElementById('chooseFolder').addEventListener('click', async () => {
-    modFolder = await ipcRenderer.invoke('select-mod-folder');
-    if (modFolder) {
-        setModFolder(modFolder);
-        updateGamePath(modFolder);
-    }
-});
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar
+    window.api.loadSettings();
 
-document.getElementById('changeProfile').addEventListener('click', () => {
-    document.getElementById('profileDropdown').classList.toggle('show');
-});
+    // Adicionar eventos para os botões de seleção de pasta e instalação de mod
+    document.getElementById('chooseFolder').addEventListener('click', async () => {
+        modFolder = await window.api.selectModFolder();
+        if (modFolder) {
+            setModFolder(modFolder);
+            updateGamePath(modFolder);
+        }
+    });
 
-document.getElementById('nameProfile').addEventListener('click', () => {
-    const profileName = prompt('Digite o nome do perfil:');
-    if (profileName) {
-        settings.profiles[profileName] = { mods: getSelectedMods(), game: currentGame };
-        document.getElementById('pageTitle').textContent = profileName;
-        updateSettings();
-    }
-});
-
-document.getElementById('installMod').addEventListener('click', async () => {
-    let modPath;
-    if (currentGame === 'minecraft') {
-        modPath = await ipcRenderer.invoke('select-mod-file');
-    } else {
-        modPath = await ipcRenderer.invoke('select-mod-folder');
-    }
-
-    if (modPath) {
-        const destPath = path.join(modFolder, path.basename(modPath));
-        ipcRenderer.invoke('move-mod', modPath, destPath).then(success => {
+    document.getElementById('installMod').addEventListener('click', async () => {
+        let modPath = await window.api.selectModFile();
+        if (modPath) {
+            const destPath = window.api.path.join(modFolder, window.api.path.basename(modPath));
+            const success = await window.api.moveMod(modPath, destPath);
             if (!success) alert('Falha ao instalar o mod');
             else loadMods();
-        });
-    }
+        }
+    });
+
+    // Adicionar eventos para os botões de jogos
+    document.getElementById('minecraftButton').addEventListener('click', () => {
+        showGameSection('minecraft');
+        currentGame = 'minecraft';
+        loadGamePaths();
+    });
+
+    document.getElementById('zzzButton').addEventListener('click', () => {
+        showGameSection('zzz');
+        currentGame = 'zzz';
+        loadGamePaths();
+    });
+
+    document.getElementById('genshinButton').addEventListener('click', () => {
+        showGameSection('genshin');
+        currentGame = 'genshin';
+        loadGamePaths();
+    });
 });
 
-// Handle settings loading
-ipcRenderer.on('load-settings', (event, loadedSettings) => {
-    settings = loadedSettings;
-    loadGamePaths();
-    populateHistoryDropdown();
-});
-
-// Handle updates
-ipcRenderer.on('update-available', (event, info) => {
-    // Notificar o usuário sobre a atualização disponível
-    const userDecision = confirm(`Atualização disponível (${info.version}). Deseja baixar agora?`);
-    if (userDecision) {
-        ipcRenderer.send('start-download');
-    }
-});
-
-ipcRenderer.on('update-downloaded', (event, info) => {
-    // Notificar o usuário sobre a atualização baixada
-    const userDecision = confirm(`Atualização para a versão ${info.version} foi baixada. Deseja instalar agora?`);
-    if (userDecision) {
-        ipcRenderer.send('quit-and-install');
-    }
-});
+function showGameSection(game) {
+    document.querySelectorAll('.game-section').forEach(section => {
+        section.classList.add('hidden');
+    });
+    document.getElementById(`${game}Section`).classList.remove('hidden');
+}
 
 function setModFolder(folder) {
     modFolder = folder;
-    disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
+    disabledModFolder = window.api.path.join(window.api.path.dirname(modFolder), 'mods_desativados');
     loadMods();
     updateSettings(folder);
 }
 
 function loadMods() {
     const modList = document.getElementById(`${currentGame}ModList`);
+    if (!modList) return; // Verifica se o elemento existe
+
     modList.innerHTML = '';
 
     const loadModFiles = (folder, isActive) => {
-        fs.readdir(folder, (err, files) => {
+        window.api.fs.readdir(folder, (err, files) => {
             if (err) {
                 console.error(err);
                 return;
             }
 
             files.forEach(file => {
-                const filePath = path.join(folder, file);
-                if (fs.lstatSync(filePath).isDirectory() || file.endsWith('.jar') || file.endsWith('.zip')) {
+                const filePath = window.api.path.join(folder, file);
+                const stats = window.api.fs.lstatSync(filePath);
+                if (stats.isDirectory() || file.endsWith('.jar') || file.endsWith('.zip')) {
                     addModToList(filePath, isActive);
                 }
             });
         });
     };
 
-    // Load active mods
     loadModFiles(modFolder, true);
-
-    // Load inactive mods
-    if (fs.existsSync(disabledModFolder)) {
+    if (window.api.fs.existsSync(disabledModFolder)) {
         loadModFiles(disabledModFolder, false);
     }
 }
 
 function addModToList(filePath, isActive) {
     const modList = document.getElementById(`${currentGame}ModList`);
-    const li = document.createElement('li');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.className = 'checkbox';
-    checkbox.checked = isActive;
-    checkbox.addEventListener('change', () => toggleMod(filePath, checkbox.checked));
-
-    li.appendChild(checkbox);
-    li.appendChild(document.createTextNode(path.basename(filePath)));
-    modList.appendChild(li);
-}
-
-function toggleMod(modPath, isActive) {
-    if (isActive) {
-        const destPath = path.join(modFolder, path.basename(modPath));
-        ipcRenderer.invoke('move-mod', modPath, destPath).then(success => {
-            if (!success) alert('Falha ao ativar o mod');
+    const modItem = document.createElement('li');
+    modItem.innerHTML = `
+        <input type="checkbox" class="checkbox" ${isActive ? 'checked' : ''} />
+        <span>${window.api.path.basename(filePath)}</span>
+    `;
+    modItem.querySelector('.checkbox').addEventListener('change', function() {
+        const newPath = isActive ? window.api.path.join(disabledModFolder, window.api.path.basename(filePath)) : window.api.path.join(modFolder, window.api.path.basename(filePath));
+        window.api.moveMod(filePath, newPath).then(success => {
+            if (!success) alert('Falha ao mover o mod');
             else loadMods();
         });
-    } else {
-        if (!fs.existsSync(disabledModFolder)) {
-            fs.mkdirSync(disabledModFolder);
-        }
-        const destPath = path.join(disabledModFolder, path.basename(modPath));
-        ipcRenderer.invoke('move-mod', modPath, destPath).then(success => {
-            if (!success) alert('Falha ao desativar o mod');
-            else loadMods();
-        });
-    }
+    });
+    modList.appendChild(modItem);
 }
 
-function updateSettings(folder = null) {
-    if (folder) {
-        settings.lastModFolder = folder;
-        if (!settings.history.includes(folder)) {
-            settings.history.unshift(folder);
-            if (settings.history.length > 5) {
-                settings.history.pop(); // Limitar o histórico a 5 entradas
-            }
-        }
+function updateSettings(folder) {
+    settings.lastModFolder = folder;
+    window.api.saveSettings(settings);
+}
+
+function loadGamePaths() {
+    if (settings.paths[currentGame]) {
+        setModFolder(settings.paths[currentGame]);
     }
-    ipcRenderer.invoke('save-settings', settings);
-    populateHistoryDropdown();
 }
 
 function updateGamePath(folder) {
     settings.paths[currentGame] = folder;
-    updateSettings();
+    window.api.saveSettings(settings);
 }
 
-function loadGamePaths() {
-    if (settings.paths.minecraft) {
-        setModFolder(settings.paths.minecraft);
+// Atualizações
+window.api.receiveSettings((loadedSettings) => {
+    settings = loadedSettings;
+    loadGamePaths();
+});
+
+window.api.onUpdateAvailable((info) => {
+    const userDecision = confirm(`Atualização disponível (${info.version}). Deseja baixar agora?`);
+    if (userDecision) {
+        window.api.startDownload();
     }
-    if (settings.paths.zzz) {
-        setModFolder(settings.paths.zzz);
+});
+
+window.api.onUpdateDownloaded((info) => {
+    const userDecision = confirm(`Atualização para a versão ${info.version} foi baixada. Deseja instalar agora?`);
+    if (userDecision) {
+        window.api.quitAndInstall();
     }
-    if (settings.paths.genshin) {
-        setModFolder(settings.paths.genshin);
-    }
-}
-
-function populateHistoryDropdown() {
-    const dropdown = document.getElementById('profileDropdown');
-    dropdown.innerHTML = '';
-    for (const profileName in settings.profiles) {
-        const option = document.createElement('div');
-        option.className = 'profile-option';
-        option.textContent = profileName;
-        option.addEventListener('click', () => applyProfile(profileName));
-        dropdown.appendChild(option);
-    }
-}
-
-function applyProfile(profileName) {
-    const profile = settings.profiles[profileName];
-    currentGame = profile.game;
-    document.getElementById('pageTitle').textContent = profileName;
-    loadModsFromProfile(profile);
-}
-
-function loadModsFromProfile(profile) {
-    const modList = document.getElementById(`${profile.game}ModList`);
-    modList.innerHTML = '';
-    profile.mods.forEach(mod => {
-        addModToList(mod.path, mod.active);
-    });
-}
-
-function getSelectedMods() {
-    const modList = document.getElementById(`${currentGame}ModList`);
-    const mods = [];
-    modList.querySelectorAll('li').forEach(li => {
-        const checkbox = li.querySelector('input');
-        const mod = {
-            path: path.join(modFolder, li.textContent.trim()),
-            active: checkbox.checked
-        };
-        mods.push(mod);
-    });
-    return mods;
-}
-
-function showSection(game) {
-    document.querySelectorAll('.game-section').forEach(section => section.classList.add('hidden'));
-    document.getElementById(game).classList.remove('hidden');
-    currentGame = game;
-    document.getElementById('pageTitle').textContent = `Gerenciador de Mods - ${game.charAt(0).toUpperCase() + game.slice(1)}`;
-    setModFolder(settings.paths[game] || '');
-}
+});
