@@ -65,10 +65,6 @@ app.whenReady().then(() => {
     autoUpdater.on('update-downloaded', (info) => {
         mainWindow.webContents.send('update-downloaded', info);
     });
-
-    // Adiciona listeners para o ipcMain para permitir controle de UI
-    ipcMain.on('start-download', () => {
-        autoUpdater.downloadUpdate();
 });
 
 app.on('window-all-closed', () => {
