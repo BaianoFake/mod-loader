@@ -1,7 +1,3 @@
-Claro! Aqui está um exemplo de um README bem estruturado e visualmente atraente para o seu gerenciador de mods.
-
----
-
 # Gerenciador de Mods
 
 Um aplicativo desktop simples para gerenciar mods de jogos. Com este gerenciador, você pode facilmente ativar ou desativar mods e manter um histórico de perfis para alternar entre diferentes configurações de jogos.
