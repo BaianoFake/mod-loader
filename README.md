@@ -17,7 +17,7 @@ Um aplicativo desktop simples para gerenciar mods de jogos. Com este gerenciador
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/gerenciador-de-mods.git
+   git clone https://github.com/batata6996/mod-loader
    ```
 2. Navegue até o diretório do projeto:
    ```bash
