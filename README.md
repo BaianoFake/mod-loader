@@ -1,6 +1,3 @@
-Claro! Aqui está um exemplo de um README bem estruturado e visualmente atraente para o seu gerenciador de mods.
-
----
 
 # Gerenciador de Mods
 
