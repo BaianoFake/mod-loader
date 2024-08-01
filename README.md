@@ -25,7 +25,7 @@ Um aplicativo desktop simples para gerenciar mods de jogos. Com este gerenciador
    ```
 3. Instale as dependências:
    ```bash
-   npm install
+   yarn install
    ```
 
 ## Executando o Aplicativo
@@ -33,7 +33,7 @@ Um aplicativo desktop simples para gerenciar mods de jogos. Com este gerenciador
 Para iniciar o aplicativo, use o comando:
 
 ```bash
-npm start
+   yarn start
 ```
 
 Isso abrirá uma janela do Electron onde você poderá usar o gerenciador de mods.
@@ -47,7 +47,7 @@ Isso abrirá uma janela do Electron onde você poderá usar o gerenciador de mod
 
 ## Personalização
 
-Você pode personalizar o estilo do aplicativo editando o arquivo `index.html` e as regras CSS no `<style>` da mesma.
+Você pode personalizar o estilo do aplicativo editando o arquivo `index.html` e as regras CSS no `<style>` do mesmo.
 
 ## Contribuindo
 
@@ -67,14 +67,16 @@ Você pode personalizar o estilo do aplicativo editando o arquivo `index.html` e
    ```
 5. Abra um Pull Request.
 
-6. para criar o executavel do projeto execute
-   ```bash
-   npm run dist
-   ```
+## Criando o Executável
+
+Para criar o executável do projeto, execute:
+```bash
+yarn dist
+```
 
 ## Licença
 
-Este projeto é autoral publico e qualquer pessoa pode contribuir com ele
+Este projeto é autoral e público, e qualquer pessoa pode contribuir com ele.
 
 ## Contato
 
