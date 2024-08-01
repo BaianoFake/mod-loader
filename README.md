@@ -1,4 +1,3 @@
-
 # Gerenciador de Mods
 
 Um aplicativo desktop simples para gerenciar mods de jogos. Com este gerenciador, você pode facilmente ativar ou desativar mods e manter um histórico de perfis para alternar entre diferentes configurações de jogos.
