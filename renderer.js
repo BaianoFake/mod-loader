@@ -52,4 +52,23 @@ document.addEventListener('DOMContentLoaded', () => {
     genshinBtn.addEventListener('click', () => {
         ipcRenderer.send('navigate-to', 'genshin');
     });
+
+    // Atualização automática
+    ipcRenderer.on('update_available', () => {
+        const notification = document.createElement('div');
+        notification.innerText = 'Uma nova atualização está disponível. Baixando agora...';
+        document.body.appendChild(notification);
+    });
+
+    ipcRenderer.on('update_downloaded', () => {
+        const notification = document.createElement('div');
+        notification.innerText = 'Atualização baixada. O aplicativo será reiniciado para aplicar a atualização.';
+        const restartButton = document.createElement('button');
+        restartButton.innerText = 'Reiniciar Agora';
+        restartButton.addEventListener('click', () => {
+            ipcRenderer.send('restart_app');
+        });
+        notification.appendChild(restartButton);
+        document.body.appendChild(notification);
+    });
 });

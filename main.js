@@ -1,10 +1,22 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const Store = require('electron-store');
-
-const store = new Store();
+const { autoUpdater } = require('electron-updater');
 let mainWindow;
+const configFilePath = path.join(app.getPath('userData'), 'config.json');
+
+function readConfig() {
+    if (fs.existsSync(configFilePath)) {
+        const data = fs.readFileSync(configFilePath);
+        return JSON.parse(data);
+    }
+    return {};
+}
+
+function saveConfig(config) {
+    fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
+}
+
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -14,15 +26,17 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
             contextIsolation: false
-        }
+        },
+        autoHideMenuBar: true
     });
 
     mainWindow.loadFile('index.html');
 
-    // Evento quando a janela é fechada
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    autoUpdater.checkForUpdatesAndNotify();
 }
 
 app.on('ready', createWindow);
@@ -39,6 +53,14 @@ app.on('activate', () => {
     }
 });
 
+autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update_downloaded');
+});
+
 ipcMain.on('navigate-to', (event, arg) => {
     mainWindow.loadFile(path.join(__dirname, `views/${arg}.html`));
 });
@@ -49,12 +71,18 @@ ipcMain.handle('select-mod-folder', async (event, game) => {
     });
     if (result.canceled) return null;
     const folderPath = result.filePaths[0];
-    store.set(`modFolder.${game}`, folderPath);
+
+    const config = readConfig();
+    config.modFolders = config.modFolders || {};
+    config.modFolders[game] = folderPath;
+    saveConfig(config);
+
     return folderPath;
 });
 
 ipcMain.handle('get-mod-folder', (event, game) => {
-    return store.get(`modFolder.${game}`, '');
+    const config = readConfig();
+    return config.modFolders ? config.modFolders[game] : '';
 });
 
 ipcMain.handle('select-mod-file', async () => {
