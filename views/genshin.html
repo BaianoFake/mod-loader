@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genshin Mods</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #2a2a2a;
+            height: 100vh;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sidebar button {
+            background-color: #333;
+            border: none;
+            color: white;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            width: 90%;
+        }
+        .sidebar button:hover {
+            background-color: #555;
+        }
+        .container {
+            width: calc(100% - 200px);
+            padding: 20px;
+        }
+        .container h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+        #chooseFolder, #installMod {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #333;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+        .mod-list {
+            width: 100%;
+            list-style-type: none;
+            padding: 0;
+        }
+        .mod-list li {
+            background-color: #2a2a2a;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <button id="minecraft">Minecraft</button>
+        <button id="zzz">ZZZ</button>
+        <button id="genshin">Genshin Impact</button>
+    </div>
+    <div class="container">
+        <h1>Genshin Mods</h1>
+        <button id="chooseFolder">Escolher Pasta de Mods</button>
+        <button id="installMod">Instalar Mod</button>
+        <ul id="modList" class="mod-list"></ul>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+        const path = require('path');
+        const fs = require('fs');
+
+        let modFolder = '';
+        let disabledModFolder = '';
+
+        document.getElementById('chooseFolder').addEventListener('click', async () => {
+            const selectedFolder = await ipcRenderer.invoke('select-mod-folder');
+            if (selectedFolder) {
+                setModFolder(selectedFolder);
+            }
+        });
+
+        document.getElementById('installMod').addEventListener('click', async () => {
+            const modPath = await ipcRenderer.invoke('select-mod-file');
+            if (modPath) {
+                const destPath = path.join(modFolder, path.basename(modPath));
+                const success = await ipcRenderer.invoke('move-mod', modPath, destPath);
+                if (!success) alert('Falha ao instalar o mod');
+                else loadMods();
+            }
+        });
+
+        function setModFolder(folder) {
+            modFolder = folder;
+            disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
+            loadMods();
+        }
+
+        function loadMods() {
+            const modList = document.getElementById('modList');
+            modList.innerHTML = '';
+
+            if (!fs.existsSync(disabledModFolder)) {
+                fs.mkdirSync(disabledModFolder);
+            }
+
+            fs.readdir(modFolder, (err, files) => {
+                if (err) return console.error('Failed to load mods:', err);
+                files.forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = file;
+                    listItem.addEventListener('click', () => toggleMod(file));
+                    modList.appendChild(listItem);
+                });
+            });
+
+            fs.readdir(disabledModFolder, (err, files) => {
+                if (err) return console.error('Failed to load disabled mods:', err);
+                files.forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = file + ' (desativado)';
+                    listItem.addEventListener('click', () => toggleMod(file, true));
+                    modList.appendChild(listItem);
+                });
+            });
+        }
+
+        function toggleMod(modName, isDisabled = false) {
+            const sourceFolder = isDisabled ? disabledModFolder : modFolder;
+            const destFolder = isDisabled ? modFolder : disabledModFolder;
+            const modPath = path.join(sourceFolder, modName);
+            const destPath = path.join(destFolder, modName);
+
+            fs.rename(modPath, destPath, err => {
+                if (err) return console.error('Failed to move mod:', err);
+                loadMods();
+            });
+        }
+
+        // Adiciona a funcionalidade de navegação para outros jogos
+        document.getElementById('minecraft').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'minecraft');
+        });
+
+        document.getElementById('zzz').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'zzz');
+        });
+
+        document.getElementById('genshin').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'genshin');
+        });
+    </script>
+</body>
+</html>

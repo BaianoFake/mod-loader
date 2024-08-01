@@ -1,57 +1,45 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { autoUpdater } = require("electron-updater");
-
+const { autoUpdater } = require('electron-updater');
 let mainWindow;
-const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+const configFilePath = path.join(app.getPath('userData'), 'config.json');
 
-autoUpdater.autoDownload = false; // Para controle manual do download
-autoUpdater.autoInstallOnAppQuit = true;
+function readConfig() {
+    if (fs.existsSync(configFilePath)) {
+        const data = fs.readFileSync(configFilePath);
+        return JSON.parse(data);
+    }
+    return {};
+}
+
+function saveConfig(config) {
+    fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
+}
+
 
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
-            contextIsolation: false,
+            contextIsolation: false
         },
+        autoHideMenuBar: true
     });
 
     mainWindow.loadFile('index.html');
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+
+    autoUpdater.checkForUpdatesAndNotify();
 }
 
-app.whenReady().then(() => {
-    createWindow();
-    mainWindow.webContents.on('did-finish-load', () => {
-        if (fs.existsSync(settingsPath)) {
-            const settings = JSON.parse(fs.readFileSync(settingsPath));
-            mainWindow.webContents.send('load-settings', settings);
-        }
-    });
-
-    // Verifica se há atualizações
-    autoUpdater.checkForUpdates();
-
-    // Notifica o usuário sobre atualizações
-    autoUpdater.on('update-available', (info) => {
-        mainWindow.webContents.send('update-available', info);
-    });
-
-    autoUpdater.on('update-downloaded', (info) => {
-        mainWindow.webContents.send('update-downloaded', info);
-    });
-
-    // Adiciona listeners para o ipcMain para permitir controle de UI
-    ipcMain.on('start-download', () => {
-        autoUpdater.downloadUpdate();
-    });
-
-    ipcMain.on('quit-and-install', () => {
-        autoUpdater.quitAndInstall();
-    });
-});
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -65,31 +53,53 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.handle('select-mod-folder', async () => {
+autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update_downloaded');
+});
+
+ipcMain.on('navigate-to', (event, arg) => {
+    mainWindow.loadFile(path.join(__dirname, `views/${arg}.html`));
+});
+
+ipcMain.handle('select-mod-folder', async (event, game) => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openDirectory']
     });
-    return result.filePaths[0];
+    if (result.canceled) return null;
+    const folderPath = result.filePaths[0];
+
+    const config = readConfig();
+    config.modFolders = config.modFolders || {};
+    config.modFolders[game] = folderPath;
+    saveConfig(config);
+
+    return folderPath;
+});
+
+ipcMain.handle('get-mod-folder', (event, game) => {
+    const config = readConfig();
+    return config.modFolders ? config.modFolders[game] : '';
 });
 
 ipcMain.handle('select-mod-file', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile'],
-        filters: [{ name: 'Mods', extensions: ['jar', 'zip'] }]
+        filters: [{ name: 'JAR Files', extensions: ['jar'] }]
     });
+    if (result.canceled) return null;
     return result.filePaths[0];
 });
 
-ipcMain.handle('save-settings', (event, settings) => {
-    fs.writeFileSync(settingsPath, JSON.stringify(settings));
-});
-
-ipcMain.handle('move-mod', (event, modPath, destPath) => {
+ipcMain.handle('move-mod', async (event, source, destination) => {
     try {
-        fs.renameSync(modPath, destPath);
+        fs.renameSync(source, destination);
         return true;
     } catch (error) {
-        console.error(error);
+        console.error('Failed to move mod:', error);
         return false;
     }
 });

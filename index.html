@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCM</title>
+    <title>MCM - Menu</title>
     <style>
         body {
             background-color: #1a1a1a;
             color: #ffffff;
             font-family: Arial, sans-serif;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .sidebar {
             width: 200px;
             background-color: #2a2a2a;
-            height: 100vh;
-            padding-top: 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,91 +29,33 @@
             padding: 10px;
             margin: 5px 0;
             cursor: pointer;
-            width: 90%;
+            width: 100%;
         }
         .sidebar button:hover {
             background-color: #555;
-        }
-        .container {
-            width: calc(100% - 200px);
-            padding: 20px;
-        }
-        .container h1 {
-            text-align: center;
-            margin-top: 0;
-        }
-        .hidden {
-            display: none;
-        }
-        #chooseFolder, #changeProfile, #nameProfile, #installMod {
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #333;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-        }
-        .mod-list {
-            width: 100%;
-            list-style-type: none;
-            padding: 0;
-        }
-        .mod-list li {
-            background-color: #2a2a2a;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-        }
-        .checkbox {
-            margin-right: 15px;
-        }
-        #profileDropdown {
-            display: none;
-            position: absolute;
-            background-color: #333;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-        }
-        .profile-option {
-            padding: 8px 16px;
-            cursor: pointer;
-        }
-        .profile-option:hover {
-            background-color: #555;
-        }
-        .show {
-            display: block;
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <button onclick="showSection('minecraft')">Minecraft</button>
-        <button onclick="showSection('zzz')">ZZZ</button>
-        <button onclick="showSection('genshin')">Genshin Impact</button>
+        <button id="minecraft">Minecraft</button>
+        <button id="zzz">ZZZ</button>
+        <button id="genshin">Genshin Impact</button>
     </div>
-    <div class="container">
-        <h1 id="pageTitle">Gerenciador de Mods</h1>
-        <button id="chooseFolder">Escolher Pasta de Mods</button>
-        <button id="changeProfile">Alterar Perfil</button>
-        <button id="nameProfile">Nomear Perfil</button>
-        <button id="installMod">Instalar Mod</button>
-        <div id="profileDropdown" class="dropdown-content"></div>
-        <div id="minecraft" class="game-section">
-            <h2>Minecraft Mods</h2>
-            <ul id="minecraftModList" class="mod-list"></ul>
-        </div>
-        <div id="zzz" class="game-section hidden">
-            <h2>ZZZ Mods</h2>
-            <ul id="zzzModList" class="mod-list"></ul>
-        </div>
-        <div id="genshin" class="game-section hidden">
-            <h2>Genshin Impact Mods</h2>
-            <ul id="genshinModList" class="mod-list"></ul>
-        </div>
-    </div>
-    <script src="renderer.js"></script>
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        document.getElementById('minecraft').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'minecraft');
+        });
+
+        document.getElementById('zzz').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'zzz');
+        });
+
+        document.getElementById('genshin').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'genshin');
+        });
+    </script>
 </body>
 </html>
