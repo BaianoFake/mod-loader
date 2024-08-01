@@ -34,56 +34,27 @@
         .sidebar button:hover {
             background-color: #555;
         }
-        .profile-selector {
-            margin: 10px 0;
-            width: 100%;
-            color: #333;
-            background-color: #fff;
-        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <select id="profileSelector" class="profile-selector"></select>
-        <button id="addProfile">Adicionar Perfil</button>
         <button id="minecraft">Minecraft</button>
         <button id="zzz">ZZZ</button>
         <button id="genshin">Genshin Impact</button>
     </div>
     <script>
+        const { ipcRenderer } = require('electron');
+
         document.getElementById('minecraft').addEventListener('click', () => {
-            window.api.openGameWindow('minecraft');
+            ipcRenderer.send('navigate-to', 'minecraft');
         });
 
         document.getElementById('zzz').addEventListener('click', () => {
-            window.api.openGameWindow('zzz');
+            ipcRenderer.send('navigate-to', 'zzz');
         });
 
         document.getElementById('genshin').addEventListener('click', () => {
-            window.api.openGameWindow('genshin');
-        });
-
-        document.getElementById('addProfile').addEventListener('click', () => {
-            const profileName = prompt('Digite o nome do novo perfil:');
-            if (profileName) {
-                window.api.addProfile(profileName);
-            }
-        });
-
-        document.getElementById('profileSelector').addEventListener('change', (event) => {
-            const profileName = event.target.value;
-            window.api.loadProfile(profileName);
-        });
-
-        window.api.receiveProfiles((profiles) => {
-            const selector = document.getElementById('profileSelector');
-            selector.innerHTML = '';
-            profiles.forEach(profile => {
-                const option = document.createElement('option');
-                option.value = profile;
-                option.textContent = profile;
-                selector.appendChild(option);
-            });
+            ipcRenderer.send('navigate-to', 'genshin');
         });
     </script>
 </body>

@@ -1,21 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { autoUpdater } = require('electron-updater');
+const Store = require('electron-store');
 
+const store = new Store();
 let mainWindow;
-const settingsPath = path.join(app.getPath('userData'), 'settings.json');
-let settings = { profiles: {}, currentProfile: 'default' };
-
-function saveSettings() {
-    fs.writeFileSync(settingsPath, JSON.stringify(settings));
-}
-
-function loadSettings() {
-    if (fs.existsSync(settingsPath)) {
-        settings = JSON.parse(fs.readFileSync(settingsPath));
-    }
-}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -23,49 +12,20 @@ function createWindow() {
         height: 600,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true,
-        },
+            nodeIntegration: true,
+            contextIsolation: false
+        }
     });
 
     mainWindow.loadFile('index.html');
 
-    mainWindow.maximize();
-
-    mainWindow.on('ready-to-show', () => {
-        mainWindow.show();
-        mainWindow.webContents.send('receive-profiles', Object.keys(settings.profiles));
+    // Evento quando a janela é fechada
+    mainWindow.on('closed', () => {
+        mainWindow = null;
     });
 }
 
-app.whenReady().then(() => {
-    loadSettings();
-    createWindow();
-
-    ipcMain.on('open-game-window', (event, game) => {
-        mainWindow.loadFile(path.join('views', `${game}.html`));
-    });
-
-    ipcMain.on('add-profile', (event, profileName) => {
-        settings.profiles[profileName] = {};
-        saveSettings();
-        mainWindow.webContents.send('receive-profiles', Object.keys(settings.profiles));
-    });
-
-    ipcMain.on('load-profile', (event, profileName) => {
-        settings.currentProfile = profileName;
-        saveSettings();
-    });
-
-    autoUpdater.checkForUpdates();
-
-    autoUpdater.on('update-available', (info) => {
-        mainWindow.webContents.send('update-available', info);
-    });
-
-    autoUpdater.on('update-downloaded', (info) => {
-        mainWindow.webContents.send('update-downloaded', info);
-    });
-});
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -79,47 +39,39 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.handle('select-mod-folder', async () => {
+ipcMain.on('navigate-to', (event, arg) => {
+    mainWindow.loadFile(path.join(__dirname, `views/${arg}.html`));
+});
+
+ipcMain.handle('select-mod-folder', async (event, game) => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openDirectory']
     });
-    return result.filePaths[0];
+    if (result.canceled) return null;
+    const folderPath = result.filePaths[0];
+    store.set(`modFolder.${game}`, folderPath);
+    return folderPath;
+});
+
+ipcMain.handle('get-mod-folder', (event, game) => {
+    return store.get(`modFolder.${game}`, '');
 });
 
 ipcMain.handle('select-mod-file', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile'],
-        filters: [
-            { name: 'Mods', extensions: ['jar', 'zip'] }
-        ]
+        filters: [{ name: 'JAR Files', extensions: ['jar'] }]
     });
+    if (result.canceled) return null;
     return result.filePaths[0];
 });
 
-ipcMain.handle('move-mod', async (event, modPath, destPath) => {
+ipcMain.handle('move-mod', async (event, source, destination) => {
     try {
-        fs.renameSync(modPath, destPath);
+        fs.renameSync(source, destination);
         return true;
     } catch (error) {
-        console.error(error);
+        console.error('Failed to move mod:', error);
         return false;
     }
-});
-
-ipcMain.handle('save-settings', (event, newSettings) => {
-    settings = newSettings;
-    saveSettings();
-    return settings;
-});
-
-ipcMain.on('load-settings', (event) => {
-    event.reply('load-settings', settings);
-});
-
-ipcMain.on('start-download', () => {
-    autoUpdater.downloadUpdate();
-});
-
-ipcMain.on('quit-and-install', () => {
-    autoUpdater.quitAndInstall();
 });

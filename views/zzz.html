@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCM - ZZZ Mods</title>
+    <title>ZZZ Mods</title>
     <style>
         body {
             background-color: #1a1a1a;
@@ -40,9 +40,6 @@
             text-align: center;
             margin-top: 0;
         }
-        .hidden {
-            display: none;
-        }
         #chooseFolder, #installMod {
             margin: 10px;
             padding: 10px 20px;
@@ -64,129 +61,104 @@
             display: flex;
             align-items: center;
         }
-        .checkbox {
-            margin-right: 15px;
-        }
-        .show {
-            display: block;
-        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <button id="minecraftButton">Minecraft</button>
-        <button id="zzzButton">ZZZ</button>
-        <button id="genshinButton">Genshin Impact</button>
+        <button id="minecraft">Minecraft</button>
+        <button id="zzz">ZZZ</button>
+        <button id="genshin">Genshin Impact</button>
     </div>
     <div class="container">
-        <h1 id="pageTitle">Gerenciador de Mods</h1>
+        <h1>ZZZ Mods</h1>
         <button id="chooseFolder">Escolher Pasta de Mods</button>
         <button id="installMod">Instalar Mod</button>
-        <div id="zzzSection" class="game-section hidden">
-            <h2>ZZZ Mods</h2>
-            <ul id="zzzModList" class="mod-list"></ul>
-        </div>
+        <ul id="modList" class="mod-list"></ul>
     </div>
-    <script src="../renderer.js"></script>
     <script>
-        document.getElementById('minecraftButton').addEventListener('click', () => {
-            showGameSection('minecraftSection');
+        const { ipcRenderer } = require('electron');
+        const path = require('path');
+        const fs = require('fs');
+
+        let modFolder = '';
+        let disabledModFolder = '';
+
+        document.getElementById('chooseFolder').addEventListener('click', async () => {
+            const selectedFolder = await ipcRenderer.invoke('select-mod-folder');
+            if (selectedFolder) {
+                setModFolder(selectedFolder);
+            }
         });
 
-        document.getElementById('zzzButton').addEventListener('click', () => {
-            showGameSection('zzzSection');
-        });
-
-        document.getElementById('genshinButton').addEventListener('click', () => {
-            showGameSection('genshinSection');
-        });
-
-        function showGameSection(sectionId) {
-            document.querySelectorAll('.game-section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
-        }
-
-        let modFolder;
-        let disabledModFolder;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            window.api.setGame('ZZZ');
-
-            document.getElementById('chooseFolder').addEventListener('click', async () => {
-                const selectedFolder = await window.api.selectModFolder();
-                if (selectedFolder) {
-                    setModFolder(selectedFolder);
-                }
-            });
-
-            document.getElementById('installMod').addEventListener('click', async () => {
-                const modPath = await window.api.selectModFile();
-                if (modPath) {
-                    const destPath = path.join(modFolder, path.basename(modPath));
-                    const success = await window.api.moveMod(modPath, destPath);
-                    if (!success) alert('Falha ao instalar o mod');
-                    else loadMods();
-                }
-            });
+        document.getElementById('installMod').addEventListener('click', async () => {
+            const modPath = await ipcRenderer.invoke('select-mod-file');
+            if (modPath) {
+                const destPath = path.join(modFolder, path.basename(modPath));
+                const success = await ipcRenderer.invoke('move-mod', modPath, destPath);
+                if (!success) alert('Falha ao instalar o mod');
+                else loadMods();
+            }
         });
 
         function setModFolder(folder) {
             modFolder = folder;
-            disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
+            disabledModFolder = path.join(path.dirname(modFolder), 'disabled_mods');
             loadMods();
-            updateGamePath(folder);
         }
 
         function loadMods() {
-            const modList = document.getElementById('genshinModList');
+            const modList = document.getElementById('modList');
             modList.innerHTML = '';
 
-            const loadModFiles = (folder, isActive) => {
-                fs.readdir(folder, (err, files) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-
-                    files.forEach(file => {
-                        const filePath = path.join(folder, file);
-                        if (fs.lstatSync(filePath).isDirectory() || file.endsWith('.jar') || file.endsWith('.zip')) {
-                            addModToList(filePath, isActive);
-                        }
-                    });
-                });
-            };
-
-            loadModFiles(modFolder, true);
-
-            if (fs.existsSync(disabledModFolder)) {
-                loadModFiles(disabledModFolder, false);
+            if (!fs.existsSync(disabledModFolder)) {
+                fs.mkdirSync(disabledModFolder);
             }
-        }
 
-        function addModToList(filePath, isActive) {
-            const modList = document.getElementById('genshinModList');
-            const modItem = document.createElement('li');
-            modItem.innerHTML = `
-                <input type="checkbox" class="checkbox" ${isActive ? 'checked' : ''} />
-                <span>${path.basename(filePath)}</span>
-            `;
-            modItem.querySelector('.checkbox').addEventListener('change', function() {
-                const newPath = isActive ? path.join(disabledModFolder, path.basename(filePath)) : path.join(modFolder, path.basename(filePath));
-                window.api.moveMod(filePath, newPath).then(success => {
-                    if (!success) alert('Falha ao mover o mod');
-                    else loadMods();
+            fs.readdir(modFolder, (err, files) => {
+                if (err) return console.error('Failed to load mods:', err);
+                files.forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = file;
+                    listItem.addEventListener('click', () => toggleMod(file));
+                    modList.appendChild(listItem);
                 });
             });
-            modList.appendChild(modItem);
+
+            fs.readdir(disabledModFolder, (err, files) => {
+                if (err) return console.error('Failed to load disabled mods:', err);
+                files.forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = file + ' (desativado)';
+                    listItem.addEventListener('click', () => toggleMod(file, true));
+                    modList.appendChild(listItem);
+                });
+            });
         }
 
-        function updateGamePath(folder) {
-            settings.paths['genshin'] = folder;
-            window.api.saveSettings(settings);
+        function toggleMod(modName, isDisabled = false) {
+            const sourceFolder = isDisabled ? disabledModFolder : modFolder;
+            const destFolder = isDisabled ? modFolder : disabledModFolder;
+            const modPath = path.join(sourceFolder, modName);
+            const destPath = path.join(destFolder, modName);
+
+            fs.rename(modPath, destPath, err => {
+                if (err) return console.error('Failed to move mod:', err);
+                loadMods();
+            });
         }
+
+        // Adiciona a funcionalidade de navegação para outros jogos
+        document.getElementById('minecraft').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'minecraft');
+        });
+
+        document.getElementById('zzz').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'zzz');
+        });
+
+        document.getElementById('genshin').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'genshin');
+        });
     </script>
 </body>
 </html>
