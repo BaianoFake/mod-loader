@@ -103,12 +103,15 @@
         async function setModFolder(folder) {
             modFolder = folder;
             disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
-            loadMods();
+            await loadMods();
         }
 
         async function loadMods() {
             const savedFolder = await ipcRenderer.invoke('get-mod-folder', 'minecraft');
-            if (savedFolder) setModFolder(savedFolder);
+            if (savedFolder) {
+                modFolder = savedFolder;
+                disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
+            }
 
             const modList = document.getElementById('modList');
             modList.innerHTML = '';
@@ -117,30 +120,19 @@
                 fs.mkdirSync(disabledModFolder);
             }
 
-            fs.readdir(modFolder, (err, files) => {
-                if (err) return console.error('Failed to load mods:', err);
-                if (files.length === 0) {
-                    loadDisabledMods();
-                } else {
-                    files.forEach(file => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = file;
-                        listItem.addEventListener('click', () => toggleMod(file));
-                        modList.appendChild(listItem);
-                    });
-                    loadDisabledMods();
-                }
-            });
+            loadModFiles(modFolder, false);
+            loadModFiles(disabledModFolder, true);
         }
 
-        function loadDisabledMods() {
-            fs.readdir(disabledModFolder, (err, files) => {
-                if (err) return console.error('Failed to load disabled mods:', err);
+        function loadModFiles(folder, isDisabled) {
+            fs.readdir(folder, (err, files) => {
+                if (err) return console.error('Failed to load mods:', err);
+                const modList = document.getElementById('modList');
                 files.forEach(file => {
                     const listItem = document.createElement('li');
-                    listItem.textContent = file + ' (desativado)';
-                    listItem.addEventListener('click', () => toggleMod(file, true));
-                    document.getElementById('modList').appendChild(listItem);
+                    listItem.textContent = file + (isDisabled ? ' (desativado)' : '');
+                    listItem.addEventListener('click', () => toggleMod(file, isDisabled));
+                    modList.appendChild(listItem);
                 });
             });
         }

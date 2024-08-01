@@ -84,7 +84,7 @@
         let disabledModFolder = '';
 
         document.getElementById('chooseFolder').addEventListener('click', async () => {
-            const selectedFolder = await ipcRenderer.invoke('select-mod-folder', 'minecraft');
+            const selectedFolder = await ipcRenderer.invoke('select-mod-folder', 'zzz');
             if (selectedFolder) {
                 setModFolder(selectedFolder);
             }
@@ -102,12 +102,12 @@
 
         async function setModFolder(folder) {
             modFolder = folder;
-            disabledModFolder = path.join(path.dirname(modFolder), 'disabled_mods');
+            disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
             await loadMods();
         }
 
         async function loadMods() {
-            const savedFolder = await ipcRenderer.invoke('get-mod-folder', 'minecraft');
+            const savedFolder = await ipcRenderer.invoke('get-mod-folder', 'zzz');
             if (savedFolder) {
                 modFolder = savedFolder;
                 disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');

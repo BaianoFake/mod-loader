@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genshin Mods</title>
+    <title>genshin Mods</title>
     <style>
         body {
             background-color: #1a1a1a;
@@ -70,7 +70,7 @@
         <button id="genshin">Genshin Impact</button>
     </div>
     <div class="container">
-        <h1>Genshin Mods</h1>
+        <h1>Gemshin Mods</h1>
         <button id="chooseFolder">Escolher Pasta de Mods</button>
         <button id="installMod">Instalar Mod</button>
         <ul id="modList" class="mod-list"></ul>
@@ -84,7 +84,7 @@
         let disabledModFolder = '';
 
         document.getElementById('chooseFolder').addEventListener('click', async () => {
-            const selectedFolder = await ipcRenderer.invoke('select-mod-folder');
+            const selectedFolder = await ipcRenderer.invoke('select-mod-folder', 'genshin');
             if (selectedFolder) {
                 setModFolder(selectedFolder);
             }
@@ -100,13 +100,19 @@
             }
         });
 
-        function setModFolder(folder) {
+        async function setModFolder(folder) {
             modFolder = folder;
             disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
-            loadMods();
+            await loadMods();
         }
 
-        function loadMods() {
+        async function loadMods() {
+            const savedFolder = await ipcRenderer.invoke('get-mod-folder', 'genshin');
+            if (savedFolder) {
+                modFolder = savedFolder;
+                disabledModFolder = path.join(path.dirname(modFolder), 'mods_desativados');
+            }
+
             const modList = document.getElementById('modList');
             modList.innerHTML = '';
 
@@ -114,22 +120,18 @@
                 fs.mkdirSync(disabledModFolder);
             }
 
-            fs.readdir(modFolder, (err, files) => {
-                if (err) return console.error('Failed to load mods:', err);
-                files.forEach(file => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = file;
-                    listItem.addEventListener('click', () => toggleMod(file));
-                    modList.appendChild(listItem);
-                });
-            });
+            loadModFiles(modFolder, false);
+            loadModFiles(disabledModFolder, true);
+        }
 
-            fs.readdir(disabledModFolder, (err, files) => {
-                if (err) return console.error('Failed to load disabled mods:', err);
+        function loadModFiles(folder, isDisabled) {
+            fs.readdir(folder, (err, files) => {
+                if (err) return console.error('Failed to load mods:', err);
+                const modList = document.getElementById('modList');
                 files.forEach(file => {
                     const listItem = document.createElement('li');
-                    listItem.textContent = file + ' (desativado)';
-                    listItem.addEventListener('click', () => toggleMod(file, true));
+                    listItem.textContent = file + (isDisabled ? ' (desativado)' : '');
+                    listItem.addEventListener('click', () => toggleMod(file, isDisabled));
                     modList.appendChild(listItem);
                 });
             });
@@ -159,6 +161,8 @@
         document.getElementById('genshin').addEventListener('click', () => {
             ipcRenderer.send('navigate-to', 'genshin');
         });
+
+        loadMods();
     </script>
 </body>
 </html>
