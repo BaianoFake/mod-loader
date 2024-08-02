@@ -29,7 +29,7 @@ function createWindow() {
         //autoHideMenuBar: true
     });
 
-    mainWindow.loadFile('index.html');
+    mainWindow.loadFile('./views/index.html');
 
     mainWindow.on('closed', () => {
         mainWindow = null;

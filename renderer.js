@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const minecraftBtn = document.getElementById('minecraft');
     const zzzBtn = document.getElementById('zzz');
     const genshinBtn = document.getElementById('genshin');
+    const homeBtn = document.getElementById('home')
 
     const modLoader = new ModLoader();
 
@@ -46,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     genshinBtn.addEventListener('click', () => {
         ipcRenderer.send('navigate-to', 'genshin');
+    });
+
+    homeBtn.addEventListener('click', () => {
+        ipcRenderer.send('navigate-to', 'index');
     });
 
     ipcRenderer.on('update_available', () => {

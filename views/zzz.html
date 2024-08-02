@@ -3,67 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>zzz Mods</title>
+    <title>ZZZ Mods</title>
     <style>
         body {
-            background-color: #1a1a1a;
+            background: linear-gradient(to right, #1a1a1a, #4B0082);
             color: #ffffff;
             font-family: Arial, sans-serif;
+            margin: 0;
             display: flex;
-        }
-        .sidebar {
-            width: 200px;
-            background-color: #2a2a2a;
             height: 100vh;
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            overflow: hidden;
         }
         body::-webkit-scrollbar {
-            width: 12px; /* Largura da barra de rolagem */
+            width: 12px;
         }
-
         body::-webkit-scrollbar-track {
-            background: #2a2a2a; /* Cor do trilho da barra de rolagem */
+            background: #2a2a2a;
         }
-
         body::-webkit-scrollbar-thumb {
-            background-color: #555; /* Cor da barra de rolagem */
-            border-radius: 20px; /* Bordas arredondadas */
-            border: 3px solid #2a2a2a; /* Espaço ao redor da barra de rolagem */
-        }
-
-        body::-webkit-scrollbar-thumb:hover {
-            background-color: #777; /* Cor da barra de rolagem quando hover */
-        }
-        .sidebar button {
-            background-color: #333;
-            border: none;
-            color: white;
-            padding: 10px;
-            margin: 5px 0;
-            cursor: pointer;
-            width: 90%;
-        }
-        .sidebar button:hover {
             background-color: #555;
+            border-radius: 20px;
+            border: 3px solid #2a2a2a;
         }
-        .container {
-            width: calc(100% - 200px);
+        body::-webkit-scrollbar-thumb:hover {
+            background-color: #777;
+        }
+        .left-sidebar {
+            width: 60px;
+            background-color: #2a2a2a;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+        .top-buttons {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: auto;
+        }
+        .left-sidebar button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin: 5px 0;
+            padding: 0;
+            position: relative;
+        }
+        .left-sidebar button img {
+            width: 40px;
+            height: 40px;
+        }
+        .left-sidebar button:hover::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 45px;
+            height: 45px;
+            background-color: rgba(70, 24, 108, 0.29);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            z-index: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .left-sidebar button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
             padding: 20px;
+            overflow-y: auto;
+            background-color: rgba(12, 12, 12, 0.7);
+            border-radius: 10px;
+            height: 100%;
+            position: relative;
         }
-        .container h1 {
-            text-align: center;
-            margin-top: 0;
+        .title {
+            font-size: 24px;
+            margin-bottom: 20px;
         }
-        #chooseFolder, #installMod {
-            margin: 10px;
-            padding: 10px 20px;
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .button-container button {
             background-color: #333;
             border: none;
-            color: #fff;
+            color: #ffffff;
+            padding: 10px 20px;
             cursor: pointer;
+            border-radius: 5px;
+        }
+        .button-container button:hover {
+            background-color: #555;
         }
         .mod-list {
             width: 100%;
@@ -78,24 +117,50 @@
             display: flex;
             align-items: center;
         }
+        @media (max-width: 768px) {
+            .left-sidebar {
+                width: 50px;
+            }
+            .left-sidebar button img {
+                width: 30px;
+                height: 30px;
+            }
+        }
+        @media (max-width: 480px) {
+            .left-sidebar {
+                width: 40px;
+            }
+            .left-sidebar button img {
+                width: 25px;
+                height: 25px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <button id="minecraft">Minecraft</button>
-        <button id="zzz">ZZZ</button>
-        <button id="genshin">Genshin Impact</button>
+    <div class="left-sidebar">
+        <div class="top-buttons">
+            <button id="home"><img src="../images/home.png" alt="Home"></button>
+            <button id="game1"><img src="../images/minecraft_icon.png" alt="Jogo 1"></button>
+            <button id="game2"><img src="../images/zzz_icon.png" alt="Jogo 2"></button>
+            <button id="game3"><img src="../images/genshinicon.png" alt="Jogo 3"></button>
+        </div>
+        <button id="discord"><img src="../images/discord-round-black-icon.webp" alt="Discord"></button>
+        <button id="github"><img src="../images/github.png" alt="GitHub"></button>
+        <button id="settings"><img src="../images/settingsbutton_99706.webp" alt="Configurações"></button>
     </div>
-    <div class="container">
-        <h1>ZZZ Mods</h1>
-        <button id="chooseFolder">Escolher Pasta de Mods</button>
-        <button id="installMod">Instalar Mod</button>
-        <button id="chooseModLoader">Escolher Mod Loader</button>
-        <button id="chooseGameFile">Escolher Arquivo de Inicialização</button>
+    <div class="main-content">
+        <div class="title">ZZZ Mods</div>
+        <div class="button-container">
+            <button id="chooseFolder">Escolher Pasta de Mods</button>
+            <button id="installMod">Instalar Mod</button>
+            <button id="chooseModLoader">Escolher Mod Loader</button> 
+            <button id="chooseGameFile">Escolher Arquivo de Inicialização</button>
+        </div>
         <ul id="modList" class="mod-list"></ul>
     </div>
     <script>
-        const { ipcRenderer } = require('electron');
+        const { ipcRenderer, shell } = require('electron');
         const path = require('path');
         const fs = require('fs');
 
@@ -167,43 +232,46 @@
                 loadMods();
             });
         }
+
+        // Adiciona a funcionalidade de navegação para outros jogos
+        document.getElementById('game1').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'minecraft');
+        });
+
+        document.getElementById('game2').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'zzz');
+        }); 
+
+        document.getElementById('game3').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'genshin');
+        });
+
+        document.getElementById('home').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'index');
+        });
         
-        chooseModLoaderBtn.addEventListener('click', async () => {
+        document.getElementById('chooseModLoader').addEventListener('click', async () => {
             const modLoaderPath = await ipcRenderer.invoke('select-mod-file');
             if (modLoaderPath) {
                 console.log('Mod Loader selecionado:', modLoaderPath);
-                chooseModLoaderBtn.textContent = 'Iniciar Mod';
-                chooseModLoaderBtn.onclick = () => {
+                document.getElementById('chooseModLoader').textContent = 'Iniciar Mod';
+                document.getElementById('chooseModLoader').onclick = () => {
                     // Lógica para iniciar o Mod Loader
                     console.log('Iniciando Mod Loader:', modLoaderPath);
                 };
             }
         });
 
-        chooseGameFileBtn.addEventListener('click', async () => {
+        document.getElementById('chooseGameFile').addEventListener('click', async () => {
             const gameFilePath = await ipcRenderer.invoke('select-mod-file');
             if (gameFilePath) {
                 console.log('Arquivo de inicialização selecionado:', gameFilePath);
-                chooseGameFileBtn.textContent = 'Iniciar Jogo';
-                chooseGameFileBtn.onclick = () => {
+                document.getElementById('chooseGameFile').textContent = 'Iniciar Jogo';
+                document.getElementById('chooseGameFile').onclick = () => {
                     // Lógica para iniciar o jogo
                     console.log('Iniciando Jogo:', gameFilePath);
                 };
             }
-        });
-
-
-        // Adiciona a funcionalidade de navegação para outros jogos
-        document.getElementById('minecraft').addEventListener('click', () => {
-            ipcRenderer.send('navigate-to', 'minecraft');
-        });
-
-        document.getElementById('zzz').addEventListener('click', () => {
-            ipcRenderer.send('navigate-to', 'zzz');
-        });
-
-        document.getElementById('genshin').addEventListener('click', () => {
-            ipcRenderer.send('navigate-to', 'genshin');
         });
 
         loadMods();
