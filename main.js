@@ -17,7 +17,6 @@ function saveConfig(config) {
     fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
 }
 
-
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -27,7 +26,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false
         },
-        autoHideMenuBar: true
+        //autoHideMenuBar: true
     });
 
     mainWindow.loadFile('index.html');

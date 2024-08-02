@@ -6,44 +6,162 @@
     <title>MCM - Menu</title>
     <style>
         body {
-            background-color: #1a1a1a;
+            background: linear-gradient(to right, #1a1a1a, #4B0082);
             color: #ffffff;
             font-family: Arial, sans-serif;
+            margin: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
-        .sidebar {
-            width: 200px;
+        body::-webkit-scrollbar {
+            width: 12px;
+        }
+        body::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        body::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 20px;
+            border: 3px solid #2a2a2a;
+        }
+        body::-webkit-scrollbar-thumb:hover {
+            background-color: #777;
+        }
+        .left-sidebar {
+            width: 60px;
             background-color: #2a2a2a;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            justify-content: flex-end; /* Alinha os botões na parte inferior */
+            height: 100vh;
         }
-        .sidebar button {
+        .left-sidebar button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin: 5px 0; /* Espaçamento entre os botões */
+            padding: 0;
+        }
+        .left-sidebar button img {
+            width: 40px;
+            height: 40px;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: rgba(42, 42, 42, 0.4); /* Opacidade reduzida */
+            border-radius: 10px;
+            margin: 10px;
+            max-width: calc(100% - 70px); /* Ajusta para a largura da barra lateral */
+        }
+        .title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .sidebar {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .game-button {
+            position: relative;
             background-color: #333;
             border: none;
             color: white;
-            padding: 10px;
-            margin: 5px 0;
             cursor: pointer;
-            width: 100%;
+            width: 160px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            overflow: hidden;
         }
-        .sidebar button:hover {
-            background-color: #555;
+        .game-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .game-button:hover img {
+            transform: scale(1.1);
+        }
+        .game-button span {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 0;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        .game-button:hover span {
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            .game-button {
+                width: 120px;
+                height: 150px;
+            }
+        }
+        @media (max-width: 480px) {
+            .game-button {
+                width: 100px;
+                height: 130px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <button id="minecraft">Minecraft</button>
-        <button id="zzz">ZZZ</button>
-        <button id="genshin">Genshin Impact</button>
+    <div class="left-sidebar">
+        <button id="discord"><img src="./images/discord-round-black-icon.webp" alt="Discord"></button>
+        <button id="github"><img src="./images/25231.png" alt="GitHub"></button>
+        <button id="settings"><img src="./images/settingsbutton_99706.webp" alt="Configurações"></button>
+    </div>
+    <div class="main-content">
+        <div class="title">Escolha o jogo</div>
+        <div class="sidebar">
+            <button class="game-button" id="minecraft">
+                <img src="./images/Minecraft_capa.png" alt="Minecraft">
+                <span>Minecraft</span>
+            </button>
+            <button class="game-button" id="zzz">
+                <img src="./images/Zenless_Zone_Zero_cover.jpg" alt="ZZZ">
+                <span>ZZZ</span>
+            </button>
+            <button class="game-button" id="genshin">
+                <img src="./images/genshin.jpg" alt="Genshin Impact">
+                <span>Genshin Impact</span>
+            </button>
+        </div>
     </div>
     <script>
-        const { ipcRenderer } = require('electron');
+        const { ipcRenderer, shell } = require('electron');
+
+        document.getElementById('settings').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'settings');
+        });
+
+        document.getElementById('discord').addEventListener('click', () => {
+            shell.openExternal('https://discord.gg/vQ4paw93g5');
+        });
+
+        document.getElementById('github').addEventListener('click', () => {
+            shell.openExternal('https://github.com/your-project-url');
+        });
 
         document.getElementById('minecraft').addEventListener('click', () => {
             ipcRenderer.send('navigate-to', 'minecraft');

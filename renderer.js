@@ -10,10 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const zzzBtn = document.getElementById('zzz');
     const genshinBtn = document.getElementById('genshin');
 
-    // Instância do ModLoader
     const modLoader = new ModLoader();
 
-    // Adicionar perfil
     addProfileBtn.addEventListener('click', () => {
         const profileName = prompt('Nome do perfil:');
         const modFolderPath = prompt('Caminho da pasta de mods:');
@@ -24,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Atualizar selector de perfis
     function updateProfileSelector() {
         profileSelector.innerHTML = '';
         modLoader.profiles.forEach(profile => {
@@ -34,13 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Trocar de perfil
     profileSelector.addEventListener('change', () => {
         const profileName = profileSelector.value;
         modLoader.switchProfile(profileName);
     });
 
-    // Lógica para os botões de jogos (Minecraft, ZZZ, Genshin Impact)
     minecraftBtn.addEventListener('click', () => {
         ipcRenderer.send('navigate-to', 'minecraft');
     });
@@ -53,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ipcRenderer.send('navigate-to', 'genshin');
     });
 
-    // Atualização automática
     ipcRenderer.on('update_available', () => {
         const notification = document.createElement('div');
         notification.innerText = 'Uma nova atualização está disponível. Baixando agora...';

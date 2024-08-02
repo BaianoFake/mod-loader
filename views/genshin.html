@@ -48,6 +48,23 @@
             color: #fff;
             cursor: pointer;
         }
+        body::-webkit-scrollbar {
+            width: 12px; /* Largura da barra de rolagem */
+        }
+
+        body::-webkit-scrollbar-track {
+            background: #2a2a2a; /* Cor do trilho da barra de rolagem */
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background-color: #555; /* Cor da barra de rolagem */
+            border-radius: 20px; /* Bordas arredondadas */
+            border: 3px solid #2a2a2a; /* Espaço ao redor da barra de rolagem */
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background-color: #777; /* Cor da barra de rolagem quando hover */
+        }
         .mod-list {
             width: 100%;
             list-style-type: none;
@@ -73,6 +90,8 @@
         <h1>Gemshin Mods</h1>
         <button id="chooseFolder">Escolher Pasta de Mods</button>
         <button id="installMod">Instalar Mod</button>
+        <button id="chooseModLoader">Escolher Mod Loader</button> 
+        <button id="chooseGameFile">Escolher Arquivo de Inicialização</button>
         <ul id="modList" class="mod-list"></ul>
     </div>
     <script>
@@ -161,6 +180,31 @@
         document.getElementById('genshin').addEventListener('click', () => {
             ipcRenderer.send('navigate-to', 'genshin');
         });
+        
+        chooseModLoaderBtn.addEventListener('click', async () => {
+            const modLoaderPath = await ipcRenderer.invoke('select-mod-file');
+            if (modLoaderPath) {
+                console.log('Mod Loader selecionado:', modLoaderPath);
+                chooseModLoaderBtn.textContent = 'Iniciar Mod';
+                chooseModLoaderBtn.onclick = () => {
+                    // Lógica para iniciar o Mod Loader
+                    console.log('Iniciando Mod Loader:', modLoaderPath);
+                };
+            }
+        });
+
+        chooseGameFileBtn.addEventListener('click', async () => {
+            const gameFilePath = await ipcRenderer.invoke('select-mod-file');
+            if (gameFilePath) {
+                console.log('Arquivo de inicialização selecionado:', gameFilePath);
+                chooseGameFileBtn.textContent = 'Iniciar Jogo';
+                chooseGameFileBtn.onclick = () => {
+                    // Lógica para iniciar o jogo
+                    console.log('Iniciando Jogo:', gameFilePath);
+                };
+            }
+        });
+
 
         loadMods();
     </script>
