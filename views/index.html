@@ -180,6 +180,17 @@
                 <span>Genshin Impact</span>
             </button>
         </div>
+        <div class="title">𝒷𝒶𝒾𝓍𝑒 𝓃𝑜𝓋𝑜𝓈 𝓂𝑜𝒹𝓈 𝒶𝓆𝓊𝒾</div>
+        <div class="sidebar">
+            <button class="game-button" id="gamerbanana1">
+                <img src="../images/gamerbanana_cover1.jpg" alt="GamerBanana 1">
+                <span>GamerBanana 1</span>
+            </button>
+            <button class="game-button" id="gamerbanana2">
+                <img src="../images/gamerbanana_cover2.jpg" alt="GamerBanana 2">
+                <span>GamerBanana 2</span>
+            </button>
+        </div>
     </div>
     <script>
         const { ipcRenderer, shell } = require('electron');
@@ -223,6 +234,15 @@
 
         document.getElementById('home').addEventListener('click', () => {
             ipcRenderer.send('navigate-to', 'index');
+        });
+
+        // Botões GamerBanana
+        document.getElementById('gamerbanana1').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'gamebanana');
+        });
+
+        document.getElementById('gamerbanana2').addEventListener('click', () => {
+            shell.openExternal('https://gamebanana.com/');
         });
     </script>
 </body>

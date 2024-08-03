@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamerBanana</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #1a1a1a, #4B0082);
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .left-sidebar {
+            width: 60px;
+            background-color: #2a2a2a;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+        .top-buttons {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: auto;
+        }
+        .left-sidebar button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin: 5px 0;
+            padding: 0;
+            position: relative;
+        }
+        .left-sidebar button img {
+            width: 40px;
+            height: 40px;
+        }
+        .left-sidebar button:hover::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 45px;
+            height: 45px;
+            background-color: rgba(70, 24, 108, 0.29);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            z-index: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .left-sidebar button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: rgba(12, 12, 12, 0.7);
+            border-radius: 10px;
+            height: 100%;
+            position: relative;
+            width: calc(100% - 60px); /* Subtract sidebar width */
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-sidebar">
+        <div class="top-buttons">
+            <button id="home"><img src="../images/home.png" alt="Home"></button>
+            <button id="game1"><img src="../images/minecraft_icon.png" alt="Jogo 1"></button>
+            <button id="game2"><img src="../images/zzz_icon.png" alt="Jogo 2"></button>
+            <button id="game3"><img src="../images/genshinicon.png" alt="Jogo 3"></button>
+        </div>
+        <button id="discord"><img src="../images/discord-round-black-icon.webp" alt="Discord"></button>
+        <button id="github"><img src="../images/github.png" alt="GitHub"></button>
+        <button id="settings"><img src="../images/settingsbutton_99706.webp" alt="Configurações"></button>
+    </div>
+    <div class="main-content">
+        <iframe src="https://gamebanana.com/"></iframe>
+    </div>
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+
+        document.getElementById('settings').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'settings');
+        });
+
+        document.getElementById('discord').addEventListener('click', () => {
+            shell.openExternal('https://discord.gg/vQ4paw93g5');
+        });
+
+        document.getElementById('github').addEventListener('click', () => {
+            shell.openExternal('https://github.com/batata6996/mcm');
+        });
+
+        document.getElementById('home').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'index');
+        });
+
+        document.getElementById('game1').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'minecraft');
+        });
+
+        document.getElementById('game2').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'zzz');
+        });
+
+        document.getElementById('game3').addEventListener('click', () => {
+            ipcRenderer.send('navigate-to', 'genshin');
+        });
+    </script>
+</body>
+</html>

@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const minecraftBtn = document.getElementById('minecraft');
     const zzzBtn = document.getElementById('zzz');
     const genshinBtn = document.getElementById('genshin');
-    const homeBtn = document.getElementById('home')
+    const homeBtn = document.getElementById('home');
+    const gamebananaBtn = document.getElementById('gamebanana')
+
 
     const modLoader = new ModLoader();
 
@@ -43,6 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     zzzBtn.addEventListener('click', () => {
         ipcRenderer.send('navigate-to', 'zzz');
+    });
+
+    gamebananaBtn.addEventListener('click', () => {
+        ipcRenderer.send('navigate-to', 'gamebanana');
     });
 
     genshinBtn.addEventListener('click', () => {
