@@ -185,7 +185,7 @@
         const { ipcRenderer, shell } = require('electron');
 
         document.getElementById('settings').addEventListener('click', () => {
-            ipcRenderer.send('navigate-to', 'settings');
+            ipcRenderer.send('navigate-to', 'config');
         });
 
         document.getElementById('discord').addEventListener('click', () => {

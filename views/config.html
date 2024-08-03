@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            color: #4B0082;
+            margin-bottom: 20px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+        .sidebar ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: #4B0082;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .content h3 {
+            border-bottom: 1px solid #4B0082;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .content label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .content input, .content select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #4B0082;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .content button {
+            padding: 10px 20px;
+            background-color: #4B0082;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .content button:hover {
+            background-color: #5a0099;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Configurações</h2>
+        <ul>
+            <li><a href="#" class="active">Geral</a></li>
+            <li><a href="#">Complementos</a></li>
+            <li><a href="#">Idiomas</a></li>
+            <li><a href="#">Themes</a></li>
+            <li><a href="#">Privacidade</a></li>
+            <li><a href="#">Avançado</a></li>
+            <li><a href="#">Minecraft</a></li>
+            <li><a href="#">Genshin Impact</a></li>
+            <li><a href="#">Zenless Zone Zero</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h3>Geral</h3>
+        <!-- Configurações gerais -->
+        <label for="general-setting-1">Configuração Geral 1:</label>
+        <input type="text" id="general-setting-1">
+        
+        <label for="general-setting-2">Configuração Geral 2:</label>
+        <select id="general-setting-2">
+            <option value="option1">Opção 1</option>
+            <option value="option2">Opção 2</option>
+        </select>
+        
+        <button id="save-general-settings">Salvar Configurações</button>
+    </div>
+
+    <script>
+        // Aqui você pode adicionar o código JavaScript para alternar entre as seções do menu e salvar as configurações
+        const links = document.querySelectorAll('.sidebar ul li a');
+        const content = document.querySelector('.content');
+        
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                links.forEach(link => link.classList.remove('active'));
+                link.classList.add('active');
+                const section = link.textContent;
+                content.innerHTML = `<h3>${section}</h3>`;
+                if (section === 'Minecraft') {
+                    content.innerHTML += `
+                        <label for="minecraft-mod-folder">Pasta de mods para Minecraft:</label>
+                        <input type="text" id="minecraft-mod-folder" readonly>
+                        <button id="select-minecraft-folder">Selecionar Pasta</button>
+                    `;
+                } else if (section === 'Genshin Impact') {
+                    content.innerHTML += `
+                        <label for="genshin-modloader">Modloader para Genshin Impact:</label>
+                        <select id="genshin-modloader">
+                            <option value="3dmigoto">3dmigoto</option>
+                            <option value="genshinmodloader">Genshin Mod Loader</option>
+                        </select>
+                        <label for="genshin-mod-folder">Pasta de mods para Genshin Impact:</label>
+                        <input type="text" id="genshin-mod-folder" readonly>
+                        <button id="select-genshin-folder">Selecionar Pasta</button>
+                    `;
+                } else if (section === 'Zenless Zone Zero') {
+                    content.innerHTML += `
+                        <label for="zzz-mod-folder">Pasta de mods para ZZZ:</label>
+                        <input type="text" id="zzz-mod-folder" readonly>
+                        <button id="select-zzz-folder">Selecionar Pasta</button>
+                    `;
+                }
+                content.innerHTML += `<button id="save-${section.toLowerCase().replace(/ /g, '-')}-settings">Salvar Configurações</button>`;
+            });
+        });
+    </script>
+</body>
+</html>
